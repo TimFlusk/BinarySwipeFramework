@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using VerdichotomyFramework.Cards;
+using VerdichotomyFramework.Cards.Flags;
 namespace VerdichotomyFramework
 {
     /// <summary>
@@ -15,7 +16,7 @@ namespace VerdichotomyFramework
 		public StatDefinition[] stats = Array.Empty<StatDefinition>();
 
 		[Header("Flags"), Tooltip("The single FlagRegistry asset for this game.")]
-		public FlagRegistry flagRegistry;
+		public Registry flagRegistry;
 
 		[Header("Card Pools"), Tooltip("All pools the scheduler will consider. Order doesn't affect selection.")]
 		public CardPoolData[] pools = Array.Empty<CardPoolData>();

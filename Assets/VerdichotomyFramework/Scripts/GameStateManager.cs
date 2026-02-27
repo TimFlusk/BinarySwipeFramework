@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VerdichotomyFramework.Cards.Data;
+using VerdichotomyFramework.Cards.Flags;
 namespace VerdichotomyFramework
 {
     /// <summary>
@@ -71,7 +72,7 @@ namespace VerdichotomyFramework
 			{
 				foreach (var entry in config.flagRegistry.AllFlags)
 				{
-					if (entry.scope == FlagScope.Run)
+					if (entry.scope == Scope.Run)
 						_runFlags[entry.flagId] = entry.defaultValue;
 				}
 			}
@@ -220,7 +221,7 @@ namespace VerdichotomyFramework
 			{
 				foreach (var entry in config.flagRegistry.AllFlags)
 				{
-					if (entry.scope == FlagScope.Campaign)
+					if (entry.scope == Scope.Campaign)
 						_campaignFlags[entry.flagId] = entry.defaultValue;
 				}
 			}
@@ -254,7 +255,7 @@ namespace VerdichotomyFramework
 		private Dictionary<string, int> GetFlagDict(string flagId)
 		{
 			var entry = config.flagRegistry?.GetEntry(flagId);
-			return entry?.scope == FlagScope.Campaign ? _campaignFlags : _runFlags;
+			return entry?.scope == Scope.Campaign ? _campaignFlags : _runFlags;
 		}
 
 		[Serializable]

@@ -5,6 +5,7 @@ using UnityEngine;
 using VerdichotomyFramework.Cards;
 using VerdichotomyFramework.Cards.Condition;
 using VerdichotomyFramework.Cards.Data;
+using VerdichotomyFramework.Cards.Flags;
 namespace VerdichotomyFramework
 {
     /// <summary>
@@ -137,16 +138,16 @@ namespace VerdichotomyFramework
 	// ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    ///     Validates the FlagRegistry on save: checks for duplicate IDs.
+    ///     Validates the Registry on save: checks for duplicate IDs.
     /// </summary>
-    [CustomEditor(typeof(FlagRegistry))]
+    [CustomEditor(typeof(Registry))]
 	public class FlagRegistryEditor : UnityEditor.Editor
 	{
 		public override void OnInspectorGUI()
 		{
 			DrawDefaultInspector();
 
-			var registry = (FlagRegistry)target;
+			var registry = (Registry)target;
 
 			// Duplicate check
 			var seen = new HashSet<string>();
@@ -207,7 +208,7 @@ namespace VerdichotomyFramework
 			}
 
 			// Create flag registry
-			var registry = ScriptableObject.CreateInstance<FlagRegistry>();
+			var registry = ScriptableObject.CreateInstance<Registry>();
 			AssetDatabase.CreateAsset(registry, $"{root}/Flags/FlagRegistry.asset");
 
 			// Create default pool
