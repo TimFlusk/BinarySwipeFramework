@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using VerdichotomyFramework.Cards;
 namespace VerdichotomyFramework
 {
     /// <summary>

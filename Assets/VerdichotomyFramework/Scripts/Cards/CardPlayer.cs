@@ -1,7 +1,7 @@
 using System;
 using ReignsFramework.Runtime;
 using UnityEngine;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.Cards
 {
 	public enum SwipeDirection
 	{

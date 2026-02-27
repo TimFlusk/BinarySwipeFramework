@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.Cards;
 namespace VerdichotomyFramework
 {
     /// <summary>
@@ -7,7 +8,7 @@ namespace VerdichotomyFramework
     ///     References all stats, pools, and the flag registry.
     ///     The GameStateManager and CardScheduler read from this at startup.
     /// </summary>
-    [CreateAssetMenu(fileName = "GameConfig", menuName = "Reigns/Game Config")]
+    [CreateAssetMenu(fileName = "GameConfig", menuName = "Verdichotomy/Game Config")]
 	public class GameConfig : ScriptableObject
 	{
 		[Header("Stats"), Tooltip("All stats in the game, in the order they should appear in the UI.")]

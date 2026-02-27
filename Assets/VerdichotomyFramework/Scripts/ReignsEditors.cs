@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using VerdichotomyFramework.Cards;
+using VerdichotomyFramework.Cards.Condition;
 namespace VerdichotomyFramework
 {
     /// <summary>

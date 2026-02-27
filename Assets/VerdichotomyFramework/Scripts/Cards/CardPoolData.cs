@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ReignsFramework.Runtime;
 using UnityEngine;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.Cards
 {
     /// <summary>
     ///     A named, weighted collection of cards.

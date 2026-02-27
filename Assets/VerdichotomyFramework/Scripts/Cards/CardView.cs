@@ -2,7 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.Cards
 {
     /// <summary>
     ///     Drives the visual representation of a card.

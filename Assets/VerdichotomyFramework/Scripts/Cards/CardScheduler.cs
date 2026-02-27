@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ReignsFramework.Runtime;
 using UnityEngine;
 using Random = UnityEngine.Random;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.Cards
 {
     /// <summary>
     ///     Decides which card to show each turn.
