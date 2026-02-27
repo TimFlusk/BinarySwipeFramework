@@ -1,67 +1,8 @@
 using System;
 using ReignsFramework.Runtime;
 using UnityEngine;
-namespace VerdichotomyFramework.Cards
+namespace VerdichotomyFramework.Cards.Data
 {
-	// ─────────────────────────────────────────────────────────────────────────
-	// Scheduling settings embedded in CardData
-	// ─────────────────────────────────────────────────────────────────────────
-
-	public enum CardRecurrence
-	{
-		/// <summary>Shown once, then removed from the pool forever (this run).</summary>
-		OneShot,
-		/// <summary>Can appear any number of times, subject to cooldown.</summary>
-		Repeatable,
-		/// <summary>Cycles through variants sequentially (see CardData.variants).</summary>
-		Cycling
-	}
-
-	[Serializable]
-	public class CardSchedulingData
-	{
-		[Header("Recurrence")]
-		public CardRecurrence recurrence = CardRecurrence.Repeatable;
-
-		[Tooltip("Minimum number of turns before this card can appear again. 0 = no cooldown.")]
-		public int cooldownTurns;
-
-		[Header("Priority"),
-		 Tooltip("Higher weight = more likely to be chosen when multiple cards are eligible. Relative to other cards in the same pool."),
-		 Range(1, 100)]
-		public int weight = 10;
-
-		[Tooltip(
-			"If true, this card bypasses normal pool selection and goes to the front of the priority queue automatically when its conditions are met.")]
-		public bool forcePriority;
-
-		[Header("Appearance Conditions"),
-		 Tooltip("All conditions must pass for this card to be eligible. Uses [SerializeReference] for polymorphism."), SerializeReference]
-		public CardCondition[] conditions = Array.Empty<CardCondition>();
-	}
-
-	// ─────────────────────────────────────────────────────────────────────────
-	// Variant — used when recurrence = Cycling
-	// ─────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    ///     A variant is an alternate version of a card shown on subsequent visits.
-    ///     e.g. first time: "The merchant arrives.", second time: "The merchant returns."
-    ///     The base card's prompt/outcomes are used for visit 0; variants cover visits 1+.
-    /// </summary>
-    [Serializable]
-	public class CardVariant
-	{
-		[Tooltip("Prompt text for this visit number."), TextArea(2, 5)]
-		public string promptText;
-
-		[Tooltip("Override the left outcome for this variant (leave null to use the base outcome).")]
-		public OutcomeData leftOutcomeOverride;
-
-		[Tooltip("Override the right outcome for this variant (leave null to use the base outcome).")]
-		public OutcomeData rightOutcomeOverride;
-	}
-
 	// ─────────────────────────────────────────────────────────────────────────
 	// CardData — the main designer-facing ScriptableObject
 	// ─────────────────────────────────────────────────────────────────────────
@@ -85,11 +26,11 @@ namespace VerdichotomyFramework.Cards
 		public OutcomeData rightOutcome;
 
 		[Header("Scheduling")]
-		public CardSchedulingData scheduling;
+		public SchedulingData scheduling;
 
 		[Header("Variants (Cycling only)"),
 		 Tooltip("Shown on 2nd, 3rd, ... visits when recurrence = Cycling. Loops back to last if visits exceed variant count.")]
-		public CardVariant[] variants = Array.Empty<CardVariant>();
+		public Variant[] variants = Array.Empty<Variant>();
 
 #if UNITY_EDITOR
 		private void OnValidate()

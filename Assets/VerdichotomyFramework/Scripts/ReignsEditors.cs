@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using VerdichotomyFramework.Cards;
 using VerdichotomyFramework.Cards.Condition;
+using VerdichotomyFramework.Cards.Data;
 namespace VerdichotomyFramework
 {
     /// <summary>

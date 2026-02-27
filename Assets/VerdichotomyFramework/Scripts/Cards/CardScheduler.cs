@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ReignsFramework.Runtime;
 using UnityEngine;
+using VerdichotomyFramework.Cards.Data;
 using Random = UnityEngine.Random;
 namespace VerdichotomyFramework.Cards
 {

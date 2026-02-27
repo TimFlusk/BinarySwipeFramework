@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ReignsFramework.Runtime;
 using UnityEngine;
+using VerdichotomyFramework.Cards.Data;
 namespace VerdichotomyFramework.Cards
 {
     /// <summary>

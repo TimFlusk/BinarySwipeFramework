@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using VerdichotomyFramework.Cards.Data;
 namespace VerdichotomyFramework.Cards
 {
     /// <summary>
