@@ -16,7 +16,7 @@ namespace VerdichotomyFramework
 
 		// ── Persistence ───────────────────────────────────────────────────────
 
-		private const string CampaignSaveKey = "ReignsFramework_Campaign";
+		private const string CampaignSaveKey = "VerdichotomyFramework_Campaign";
 		// ── Dependencies ──────────────────────────────────────────────────────
 
 		[Tooltip("The game configuration asset.")]
