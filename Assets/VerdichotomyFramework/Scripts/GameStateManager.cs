@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using VerdichotomyFramework;
-using VerdichotomyFramework.Cards;
 using VerdichotomyFramework.Cards.Data;
-namespace ReignsFramework.Runtime
+namespace VerdichotomyFramework
 {
     /// <summary>
     ///     The single source of truth for all runtime state:

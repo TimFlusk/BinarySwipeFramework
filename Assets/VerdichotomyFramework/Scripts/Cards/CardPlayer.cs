@@ -1,5 +1,4 @@
 using System;
-using ReignsFramework.Runtime;
 using UnityEngine;
 using VerdichotomyFramework.Cards.Data;
 namespace VerdichotomyFramework.Cards

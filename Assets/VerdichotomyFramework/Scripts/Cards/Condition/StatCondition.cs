@@ -1,5 +1,4 @@
 using System;
-using ReignsFramework.Runtime;
 using UnityEngine;
 namespace VerdichotomyFramework.Cards.Condition
 {
