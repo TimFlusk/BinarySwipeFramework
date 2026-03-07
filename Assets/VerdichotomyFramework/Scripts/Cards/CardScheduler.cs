@@ -2,45 +2,53 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VerdichotomyFramework.Cards.Data;
+using VerdichotomyFramework.GameState;
 using Random = UnityEngine.Random;
 namespace VerdichotomyFramework.Cards
 {
     /// <summary>
-    ///     Decides which card to show each turn.
-    ///     Priority order:
-    ///     1. ForceNext card (set by a previous outcome's scheduling effect)
-    ///     2. Priority queue (cards queued via QueueWithPriority effect)
-    ///     3. ForcePriority cards from eligible pools (conditions met + cooldown expired)
-    ///     4. Normal weighted-random draw from eligible pools
-    ///     The scheduler never delivers a card it cannot resolve; if the eligible
-    ///     set is empty, it returns null and logs a warning.
+    /// Decides which card to show each turn.
+    /// Priority order:
+    /// <list type="number">
+    /// <item>ForceNext card (set by a previous outcome's scheduling effect).</item>
+    /// <item>Priority queue (cards queued via QueueWithPriority effect).</item>
+    /// <item>ForcePriority cards from eligible pools (conditions met + cooldown expired).</item>
+    /// <item>Normal weighted-random draw from eligible pools.</item>
+    /// </list>
+    /// The scheduler never delivers a card it cannot resolve; if the eligible
+    /// set is empty, it returns null and logs a warning.
     /// </summary>
     public class CardScheduler : MonoBehaviour
 	{
 		// ── Dependencies ──────────────────────────────────────────────────────
 
-		[Tooltip("Reference to the game's state manager.")]
-		public GameStateManager stateManager;
+		[SerializeField, Tooltip("Reference to the game's state manager.")]
+		private GameStateManager stateManager;
 
-		[Tooltip("The game configuration asset (same one as GameStateManager).")]
-		public GameConfig config;
-		private readonly HashSet<string> _disabledPools = new();
+		[SerializeField, Tooltip("The game configuration asset (same one as GameStateManager).")]
+		private GameConfig config;
+		
+		private readonly HashSet<string> disabledPools = new();
 
 		// ── Internal queues ───────────────────────────────────────────────────
 
-		private CardData _forcedNext;
-		private readonly Queue<CardData> _priorityQueue = new();
-		private readonly HashSet<string> _removedCards = new(); // cardId → removed this run
+		private CardData forcedNext;
+		private readonly Queue<CardData> priorityQueue = new();
+		private readonly HashSet<string> removedCards = new(); // cardId → removed this run
 
+		// ── Events ────────────────────────────────────────────────────────────
+		public event Action<CardData> OnCardScheduled;
+		
+		
 		// ── Pool enabled/disabled state ───────────────────────────────────────
 
 		private void Awake()
 		{
 			// Seed disabled pools from config defaults
-			foreach (var pool in config.pools)
+			foreach (var pool in config.Pools)
 			{
-				if (!pool.enabledByDefault)
-					_disabledPools.Add(pool.poolId);
+				if (!pool.EnabledByDefault)
+					disabledPools.Add(pool.PoolId);
 			}
 
 			stateManager.OnRunStarted += OnRunStarted;
@@ -54,44 +62,42 @@ namespace VerdichotomyFramework.Cards
 
 		// ── Events ────────────────────────────────────────────────────────────
 
-		public event Action<CardData> OnCardScheduled;
-
 		private void OnRunStarted()
 		{
-			_forcedNext = null;
-			_priorityQueue.Clear();
-			_removedCards.Clear();
+			forcedNext = null;
+			priorityQueue.Clear();
+			removedCards.Clear();
 
-			_disabledPools.Clear();
-			foreach (var pool in config.pools)
+			disabledPools.Clear();
+			foreach (var pool in config.Pools)
 			{
-				if (!pool.enabledByDefault)
-					_disabledPools.Add(pool.poolId);
+				if (!pool.EnabledByDefault)
+					disabledPools.Add(pool.PoolId);
 			}
 		}
 
 		// ── Public API ────────────────────────────────────────────────────────
 
         /// <summary>
-        ///     Returns the next card to show, advancing the scheduler's internal state.
-        ///     Call this once per turn before presenting the card to the player.
+        /// Returns the next card to show, advancing the scheduler's internal state.
+        /// Call this once per turn before presenting the card to the player.
         /// </summary>
         public CardData GetNextCard()
 		{
 			CardData card = null;
 
 			// 1. Hard forced next
-			if (_forcedNext != null)
+			if (forcedNext != null)
 			{
-				card = _forcedNext;
-				_forcedNext = null;
+				card = forcedNext;
+				forcedNext = null;
 				Log($"[Scheduler] Forced next: {card.cardId}");
 			}
 
 			// 2. Priority queue
-			else if (_priorityQueue.Count > 0)
+			else if (priorityQueue.Count > 0)
 			{
-				card = _priorityQueue.Dequeue();
+				card = priorityQueue.Dequeue();
 				Log($"[Scheduler] From priority queue: {card.cardId}");
 			}
 
@@ -115,49 +121,49 @@ namespace VerdichotomyFramework.Cards
 		}
 
         /// <summary>
-        ///     Apply all scheduling effects from a chosen outcome.
-        ///     Called by CardPlayer after the player commits to a swipe.
+        /// Apply all scheduling effects from a chosen outcome.
+        /// Called by CardPlayer after the player commits to a swipe.
         /// </summary>
         public void ApplySchedulingEffects(CardSchedulingEffect[] effects)
 		{
 			foreach (var effect in effects)
 			{
-				switch (effect.effectType)
+				switch (effect.EffectType)
 				{
 					case CardEffectType.ForceNext:
-						_forcedNext = effect.targetCard;
-						Log($"[Scheduler] ForceNext set: {effect.targetCard?.cardId}");
+						forcedNext = effect.TargetCard;
+						Log($"[Scheduler] ForceNext set: {effect.TargetCard?.cardId}");
 						break;
 
 					case CardEffectType.QueueWithPriority:
-						if (effect.targetCard != null)
+						if (effect.TargetCard != null)
 						{
-							_priorityQueue.Enqueue(effect.targetCard);
-							Log($"[Scheduler] Queued: {effect.targetCard.cardId}");
+							priorityQueue.Enqueue(effect.TargetCard);
+							Log($"[Scheduler] Queued: {effect.TargetCard.cardId}");
 						}
 						break;
 
 					case CardEffectType.EnablePool:
-						if (effect.targetPool != null)
+						if (effect.TargetPool != null)
 						{
-							_disabledPools.Remove(effect.targetPool.poolId);
-							Log($"[Scheduler] Pool enabled: {effect.targetPool.poolId}");
+							disabledPools.Remove(effect.TargetPool.PoolId);
+							Log($"[Scheduler] Pool enabled: {effect.TargetPool.PoolId}");
 						}
 						break;
 
 					case CardEffectType.DisablePool:
-						if (effect.targetPool != null)
+						if (effect.TargetPool != null)
 						{
-							_disabledPools.Add(effect.targetPool.poolId);
-							Log($"[Scheduler] Pool disabled: {effect.targetPool.poolId}");
+							disabledPools.Add(effect.TargetPool.PoolId);
+							Log($"[Scheduler] Pool disabled: {effect.TargetPool.PoolId}");
 						}
 						break;
 
 					case CardEffectType.RemoveCardFromRun:
-						if (effect.targetCard != null)
+						if (effect.TargetCard != null)
 						{
-							_removedCards.Add(effect.targetCard.cardId);
-							Log($"[Scheduler] Card removed from run: {effect.targetCard.cardId}");
+							removedCards.Add(effect.TargetCard.cardId);
+							Log($"[Scheduler] Card removed from run: {effect.TargetCard.cardId}");
 						}
 						break;
 				}
@@ -171,9 +177,9 @@ namespace VerdichotomyFramework.Cards
 			// Build list of (pool, eligibleCards) pairs
 			var eligiblePools = new List<(CardPoolData pool, List<CardData> cards)>();
 
-			foreach (var pool in config.pools)
+			foreach (var pool in config.Pools)
 			{
-				if (_disabledPools.Contains(pool.poolId)) continue;
+				if (disabledPools.Contains(pool.PoolId)) continue;
 				if (!pool.ArePoolConditionsMet(stateManager)) continue;
 
 				var eligible = GetEligibleCards(pool);
@@ -188,7 +194,7 @@ namespace VerdichotomyFramework.Cards
 			{
 				foreach (var card in cards)
 				{
-					if (card.scheduling.forcePriority)
+					if (card.scheduling.ForcePriority)
 					{
 						Log($"[Scheduler] ForcePriority card drawn: {card.cardId}");
 						return card;
@@ -197,11 +203,11 @@ namespace VerdichotomyFramework.Cards
 			}
 
 			// Weighted pool selection
-			var selectedPool = WeightedRandom(eligiblePools, p => p.pool.poolWeight);
-			Log($"[Scheduler] Pool selected: {selectedPool.pool.poolId}");
+			var selectedPool = WeightedRandom(eligiblePools, p => p.pool.PoolWeight);
+			Log($"[Scheduler] Pool selected: {selectedPool.pool.PoolId}");
 
 			// Weighted card selection within pool
-			var selectedCard = WeightedRandom(selectedPool.cards, c => c.scheduling.weight);
+			var selectedCard = WeightedRandom(selectedPool.cards, c => c.scheduling.Weight);
 			Log($"[Scheduler] Card selected: {selectedCard.cardId}");
 
 			return selectedCard;
@@ -211,13 +217,13 @@ namespace VerdichotomyFramework.Cards
 		{
 			var result = new List<CardData>();
 
-			foreach (var card in pool.cards)
+			foreach (var card in pool.Cards)
 			{
 				if (card == null) continue;
-				if (_removedCards.Contains(card.cardId)) continue;
+				if (removedCards.Contains(card.cardId)) continue;
 
 				// OneShot: skip if already seen
-				if (card.scheduling.recurrence == CardRecurrence.OneShot &&
+				if (card.scheduling.Recurrence == Recurrence.OneShot &&
 				    stateManager.GetVisitCount(card.cardId) > 0) continue;
 
 				// Cooldown

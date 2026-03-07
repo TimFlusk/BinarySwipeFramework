@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
-namespace VerdichotomyFramework.Cards
+using VerdichotomyFramework.GameState;
+namespace VerdichotomyFramework.Cards.Condition
 {
 	// ─────────────────────────────────────────────────────────────────────────
 	// Base condition

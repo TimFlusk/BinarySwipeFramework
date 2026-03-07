@@ -2,25 +2,35 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.GameState
 {
     /// <summary>
-    ///     Shows a death screen when a run ends, then triggers a new run.
+    /// Shows a death screen when a run ends, then triggers a new run.
     /// </summary>
     public class DeathScreenView : MonoBehaviour
 	{
 		// ── Dependencies ──────────────────────────────────────────────────────
 
-		public GameStateManager stateManager;
-		public GameConfig config;
+		[SerializeField]
+		private GameStateManager stateManager;
+		
+		[SerializeField]
+		private GameConfig config;
 
 		// ── UI References ─────────────────────────────────────────────────────
 
 		[Header("UI")]
-		public CanvasGroup deathScreenGroup;
-		public TMP_Text deathMessageText;
-		public TMP_Text reignLengthText;
-		public Button restartButton;
+		[SerializeField]
+		private CanvasGroup deathScreenGroup;
+		
+		[SerializeField]
+		private TMP_Text deathMessageText;
+		
+		[SerializeField]
+		private TMP_Text reignLengthText;
+		
+		[SerializeField]
+		private Button restartButton;
 
 		private void Start()
 		{
@@ -39,13 +49,19 @@ namespace VerdichotomyFramework
 
 		private void OnEnable()
 		{
-			if (stateManager == null) return;
+			if (stateManager == null)
+			{
+				return;
+			}
 			stateManager.OnStatLethal += HandleStatLethal;
 		}
 
 		private void OnDisable()
 		{
-			if (stateManager == null) return;
+			if (stateManager == null)
+			{
+				return;
+			}
 			stateManager.OnStatLethal -= HandleStatLethal;
 		}
 
@@ -55,7 +71,7 @@ namespace VerdichotomyFramework
 		{
 			// Find death message from stat definition
 			var message = "Your reign has ended.";
-			foreach (var stat in config.stats)
+			foreach (var stat in config.Stats)
 			{
 				if (stat.statId == statId)
 				{
@@ -79,6 +95,8 @@ namespace VerdichotomyFramework
 			StartCoroutine(HideDeathScreen());
 			stateManager.StartRun();
 		}
+		
+		// TODO: Remove the couroutines
 
 		// ── Animation ─────────────────────────────────────────────────────────
 

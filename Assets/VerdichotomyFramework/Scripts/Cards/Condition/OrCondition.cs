@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards.Condition
 {
 	/// <summary>
@@ -9,8 +10,9 @@ namespace VerdichotomyFramework.Cards.Condition
 	public class OrCondition : CardCondition
 	{
 		[SerializeReference]
-		public CardCondition[] conditions = Array.Empty<CardCondition>();
+		private CardCondition[] conditions = Array.Empty<CardCondition>();
 
+		/// <inheritdoc />
 		public override bool Evaluate(GameStateManager state)
 		{
 			foreach (var c in conditions)

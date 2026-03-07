@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards.Condition
 {
 	/// <summary>

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards.Condition
 {
 	// ─────────────────────────────────────────────────────────────────────────
@@ -12,14 +13,14 @@ namespace VerdichotomyFramework.Cards.Condition
 	[Serializable]
 	public class StatRangeCondition : CardCondition
 	{
-		[Tooltip("Which stat to check.")]
-		public StatDefinition stat;
+		[SerializeField, Tooltip("Which stat to check.")]
+		protected StatDefinition stat;
 
-		[Tooltip("Minimum value (inclusive).")]
-		public int minValue;
+		[SerializeField, Tooltip("Minimum value (inclusive).")]
+		protected int minValue;
 
-		[Tooltip("Maximum value (inclusive).")]
-		public int maxValue = 100;
+		[SerializeField, Tooltip("Maximum value (inclusive).")]
+		protected int maxValue = 100;
 
 		public override bool Evaluate(GameStateManager state)
 		{

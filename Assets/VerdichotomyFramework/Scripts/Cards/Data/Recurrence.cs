@@ -1,6 +1,9 @@
 namespace VerdichotomyFramework.Cards.Data
 {
-	public enum CardRecurrence
+	/// <summary>
+	/// Definition for detailing how frequently a card will appear in a cycle
+	/// </summary>
+	public enum Recurrence
 	{
 		/// <summary>Shown once, then removed from the pool forever (this run).</summary>
 		OneShot,

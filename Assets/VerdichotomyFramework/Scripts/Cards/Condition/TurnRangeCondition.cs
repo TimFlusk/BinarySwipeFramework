@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards.Condition
 {
 	// ─────────────────────────────────────────────────────────────────────────
@@ -13,11 +14,12 @@ namespace VerdichotomyFramework.Cards.Condition
 	public class TurnRangeCondition : CardCondition
 	{
 		[Tooltip("First turn this card can appear. 0 = from the start.")]
-		public int firstTurn;
+		protected int firstTurn;
 
 		[Tooltip("Last turn this card can appear. 0 = no upper limit.")]
-		public int lastTurn;
+		protected int lastTurn;
 
+		/// <inheritdoc />
 		public override bool Evaluate(GameStateManager state)
 		{
 			var turn = state.CurrentTurn;

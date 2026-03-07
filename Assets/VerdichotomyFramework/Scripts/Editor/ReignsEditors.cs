@@ -6,9 +6,12 @@ using VerdichotomyFramework.Cards;
 using VerdichotomyFramework.Cards.Condition;
 using VerdichotomyFramework.Cards.Data;
 using VerdichotomyFramework.Cards.Flags;
-namespace VerdichotomyFramework
+using VerdichotomyFramework.GameState;
+namespace VerdichotomyFramework.Editor
 {
-    /// <summary>
+    // TODO: Refactor to utilise UIElements
+	
+	/// <summary>
     ///     Custom inspector for CardData.
     ///     Adds "Add Condition" buttons with type-selection dropdowns to avoid
     ///     designers having to know the class names to use [SerializeReference] fields.
@@ -80,8 +83,8 @@ namespace VerdichotomyFramework
 	// ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    ///     Custom inspector for CardPoolData — shows a summary count and
-    ///     quick condition authoring buttons.
+    /// Custom inspector for CardPoolData — shows a summary count and
+    /// quick condition authoring buttons.
     /// </summary>
     [CustomEditor(typeof(CardPoolData))]
 	public class CardPoolDataEditor : UnityEditor.Editor
@@ -95,7 +98,7 @@ namespace VerdichotomyFramework
 			var pool = (CardPoolData)target;
 			EditorGUILayout.Space(6);
 			EditorGUILayout.HelpBox(
-				$"{pool.cards.Count} card(s) in this pool.",
+				$"{pool.Cards.Count} card(s) in this pool.",
 				MessageType.Info);
 
 			var conditionsProp = serializedObject.FindProperty("poolConditions");
@@ -138,7 +141,7 @@ namespace VerdichotomyFramework
 	// ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    ///     Validates the Registry on save: checks for duplicate IDs.
+    /// Validates the Registry on save: checks for duplicate IDs.
     /// </summary>
     [CustomEditor(typeof(Registry))]
 	public class FlagRegistryEditor : UnityEditor.Editor
@@ -152,10 +155,10 @@ namespace VerdichotomyFramework
 			// Duplicate check
 			var seen = new HashSet<string>();
 			var hasDuplicates = false;
-			foreach (var entry in registry.flags)
+			foreach (var entry in registry.AllFlags)
 			{
-				if (string.IsNullOrEmpty(entry.flagId)) continue;
-				if (!seen.Add(entry.flagId))
+				if (string.IsNullOrEmpty(entry.FlagId)) continue;
+				if (!seen.Add(entry.FlagId))
 				{
 					hasDuplicates = true;
 					break;
@@ -213,21 +216,21 @@ namespace VerdichotomyFramework
 
 			// Create default pool
 			var pool = ScriptableObject.CreateInstance<CardPoolData>();
-			pool.poolId = "default";
+			pool.PoolId = "default";
 			AssetDatabase.CreateAsset(pool, $"{root}/Pools/DefaultPool.asset");
 
 			// Create game config
-			var cfg = ScriptableObject.CreateInstance<GameConfig>();
-			cfg.stats = statDefs;
-			cfg.flagRegistry = registry;
-			cfg.pools = new[] { pool };
-			AssetDatabase.CreateAsset(cfg, $"{root}/Config/GameConfig.asset");
+			var gameConfig = ScriptableObject.CreateInstance<GameConfig>();
+			gameConfig.Stats = statDefs;
+			gameConfig.FlagRegistry = registry;
+			gameConfig.Pools = new[] { pool };
+			AssetDatabase.CreateAsset(gameConfig, $"{root}/Config/GameConfig.asset");
 
 			AssetDatabase.SaveAssets();
 			AssetDatabase.Refresh();
 
-			Selection.activeObject = cfg;
-			EditorGUIUtility.PingObject(cfg);
+			Selection.activeObject = gameConfig;
+			EditorGUIUtility.PingObject(gameConfig);
 
 			Debug.Log("[Reigns Framework] Starter assets created at Assets/ReignsGame/");
 		}

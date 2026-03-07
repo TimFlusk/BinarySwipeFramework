@@ -1,5 +1,5 @@
 using UnityEngine;
-namespace VerdichotomyFramework
+namespace VerdichotomyFramework.GameState
 {
     /// <summary>
     ///     Defines a single stat in the game (e.g. Church, People, Army, Treasury).

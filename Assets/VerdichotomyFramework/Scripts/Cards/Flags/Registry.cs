@@ -4,29 +4,51 @@ using UnityEngine;
 namespace VerdichotomyFramework.Cards.Flags
 {
 	/// <summary>
-	///     Central registry of all flag names used across the game.
-	///     Designers register flags here; the inspector then shows dropdowns
-	///     instead of free-text fields, preventing typo bugs.
-	///     Create one instance and reference it from the GameConfig.
+	/// Central registry of all flag names used across the game.
+	/// Designers register flags here; the inspector then shows dropdowns
+	/// instead of free-text fields, preventing typo bugs.
+	/// Create one instance and reference it from the GameConfig.
 	/// </summary>
-	[CreateAssetMenu(fileName = "FlagRegistry", menuName = "Reigns/Flag Registry")]
+	[CreateAssetMenu(fileName = "FlagRegistry", menuName = "Verdichotomy/Flag Registry")]
 	public class Registry : ScriptableObject
 	{
 
-		public List<FlagEntry> flags = new();
+		/// <summary>
+		/// Collection of flags
+		/// </summary>
+		[SerializeField]
+		private List<FlagEntry> flags = new();
+		public IEnumerable<FlagEntry> AllFlags => flags;
 
-		// ── Lookups ───────────────────────────────────────────────────────────
 
 		private Dictionary<string, FlagEntry> _lookup;
 
-		public IEnumerable<FlagEntry> AllFlags => flags;
-
-		private void OnValidate()
+		/// <summary>
+		/// Attempts to find a flag based on id.
+		/// </summary>
+		/// <param name="flagId">
+		/// The id of the flag to be searching for.
+		/// </param>
+		/// <param name="entry">
+		/// The reference to the flag entry if it is found
+		/// </param>
+		/// <returns>
+		/// <see langword="True"/>: If the entry was found. <see langword="False"/>: If no entry associated with <param name="flagId">flag id</param> was found.
+		/// </returns>
+		public bool TryGetEntry(string flagId, out FlagEntry entry)
 		{
-			_lookup = null;
-			// rebuild on change
+			entry = GetEntry(flagId);
+			return entry != null;
 		}
-
+		
+		
+		/// <summary>
+		/// Returns a flag based on the id
+		/// </summary>
+		/// <param name="flagId">The id of the flag to search for</param>
+		/// <returns>
+		/// The <see cref="FlagEntry"/> if it exists
+		/// </returns>
 		public FlagEntry GetEntry(string flagId)
 		{
 			BuildLookupIfNeeded();
@@ -34,6 +56,15 @@ namespace VerdichotomyFramework.Cards.Flags
 			return entry;
 		}
 
+		/// <summary>
+		/// Verifies if flagId is present
+		/// </summary>
+		/// <param name="flagId">
+		/// The flag ID to compare against
+		/// </param>
+		/// <returns>
+		///  <see langword="True"/> If the flag entry is present, <see langword="False"/> otherwise.
+		/// </returns>
 		public bool Contains(string flagId)
 		{
 			BuildLookupIfNeeded();
@@ -46,25 +77,17 @@ namespace VerdichotomyFramework.Cards.Flags
 			_lookup = new Dictionary<string, FlagEntry>();
 			foreach (var f in flags)
 			{
-				if (!string.IsNullOrEmpty(f.flagId))
-					_lookup[f.flagId] = f;
+				if (!string.IsNullOrEmpty(f.FlagId))
+					_lookup[f.FlagId] = f;
 			}
 		}
-
-		[Serializable]
-		public class FlagEntry
+		
+#if UNITY_EDITOR
+		private void OnValidate()
 		{
-			[Tooltip("Unique key used in save data. Never rename after shipping.")]
-			public string flagId;
-
-			[Tooltip("Human-readable description for designers.")]
-			public string description;
-
-			[Tooltip("Run = resets on death. Campaign = persists across runs.")]
-			public Scope scope = Scope.Run;
-
-			[Tooltip("Default value at the start of a run (or campaign for campaign-scope flags).")]
-			public int defaultValue;
+			_lookup = null;
+			BuildLookupIfNeeded();
 		}
+#endif
 	}
 }

@@ -3,91 +3,100 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VerdichotomyFramework.Cards.Data;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards
 {
     /// <summary>
-    ///     Drives the visual representation of a card.
-    ///     Attach to the card GameObject in your UI hierarchy.
-    ///     Wire up the serialized fields to your UI elements.
-    ///     This component subscribes to CardPlayer events and updates itself.
-    ///     Override the virtual methods to customise animation behaviour
-    ///     without modifying this base class.
+    /// Drives the visual representation of a card.
+    /// Attach to the card GameObject in your UI hierarchy.
+    /// Wire up the serialized fields to your UI elements.
+    /// This component subscribes to CardPlayer events and updates itself.
+    /// Override the virtual methods to customise animation behaviour
+    /// without modifying this base class.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
 	public class CardView : MonoBehaviour
 	{
 		// ── Dependencies ──────────────────────────────────────────────────────
 
-		[Header("Runtime")]
-		public CardPlayer cardPlayer;
+		[SerializeField, Header("Runtime")]
+		private CardPlayer cardPlayer;
 
 		// ── UI References ─────────────────────────────────────────────────────
 
-		[Header("Card Elements"), Tooltip("The card's root RectTransform (usually 'this').")]
-		public RectTransform cardRect;
+		[SerializeField, Header("Card Elements"), Tooltip("The card's root RectTransform (usually 'this').")]
+		private RectTransform cardRect;
 
-		[Tooltip("Portrait image — displays CharacterData.portrait.")]
-		public Image portraitImage;
+		[SerializeField, Tooltip("Portrait image — displays CharacterData.portrait.")]
+		private Image portraitImage;
 
-		[Tooltip("Optional animator for animated portraits.")]
-		public Animator portraitAnimator;
+		[SerializeField, Tooltip("Optional animator for animated portraits.")]
+		private Animator portraitAnimator;
 
-		[Tooltip("Background image — displays CharacterData.backgroundSprite.")]
-		public Image backgroundImage;
+		[SerializeField, Tooltip("Background image — displays CharacterData.backgroundSprite.")]
+		private Image backgroundImage;
 
-		[Tooltip("Prompt text label.")]
-		public TMP_Text promptText;
+		[SerializeField, Tooltip("Prompt text label.")]
+		private TMP_Text promptText;
 
-		[Tooltip("Character name label.")]
-		public TMP_Text characterNameText;
+		[SerializeField, Tooltip("Character name label.")]
+		private TMP_Text characterNameText;
 
-		[Header("Swipe Feedback"), Tooltip("Shown when swiping left; fades in with swipe progress.")]
-		public CanvasGroup leftHintGroup;
+		[SerializeField, Header("Swipe Feedback"), Tooltip("Shown when swiping left; fades in with swipe progress.")]
+		private CanvasGroup leftHintGroup;
 
-		[Tooltip("Text inside leftHintGroup — shows outcome.swipeHintText.")]
-		public TMP_Text leftHintText;
+		[SerializeField, Tooltip("Text inside leftHintGroup — shows outcome.swipeHintText.")]
+		private TMP_Text leftHintText;
 
-		[Tooltip("Shown when swiping right.")]
-		public CanvasGroup rightHintGroup;
+		[SerializeField, Tooltip("Shown when swiping right.")]
+		private CanvasGroup rightHintGroup;
 
-		[Tooltip("Text inside rightHintGroup.")]
-		public TMP_Text rightHintText;
+		[SerializeField, Tooltip("Text inside rightHintGroup.")]
+		private TMP_Text rightHintText;
 
-		[Header("Swipe Animation"), Tooltip("Maximum horizontal displacement of the card during a swipe gesture.")]
-		public float maxSwipeOffset = 300f;
+		[SerializeField, Header("Swipe Animation"), Tooltip("Maximum horizontal displacement of the card during a swipe gesture.")]
+		private float maxSwipeOffset = 300f;
 
-		[Tooltip("Maximum rotation of the card during a swipe gesture (degrees).")]
-		public float maxSwipeRotation = 20f;
+		[SerializeField, Tooltip("Maximum rotation of the card during a swipe gesture (degrees).")]
+		private float maxSwipeRotation = 20f;
 
-		[Tooltip("Duration of the card-leave animation when a swipe is committed (seconds).")]
-		public float exitDuration = 0.3f;
+		[SerializeField, Tooltip("Duration of the card-leave animation when a swipe is committed (seconds).")]
+		private float exitDuration = 0.3f;
 
-		[Tooltip("Duration of the card-enter animation when a new card is dealt (seconds).")]
-		public float enterDuration = 0.25f;
+		[SerializeField, Tooltip("Duration of the card-enter animation when a new card is dealt (seconds).")]
+		private float enterDuration = 0.25f;
 
 		// ── Audio ─────────────────────────────────────────────────────────────
 
 		[Header("Audio")]
 		public AudioSource audioSource;
-		private Coroutine _animationCoroutine;
-		private Vector2 _cardRestPosition;
+		
+		// TODO: No. Should be undo as quickly as possible. Who even make a coroutine a field?
+		private Coroutine animationCoroutine;
+		private Vector2 cardRestPosition;
 
 		// ── State ─────────────────────────────────────────────────────────────
 
-		private CardData _currentCard;
-		private int _currentVisit;
+		private CardData currentCard;
+		private int currentVisit;
 
 		// ── Lifecycle ─────────────────────────────────────────────────────────
 
 		protected virtual void Awake()
 		{
-			if (cardRect == null) cardRect = GetComponent<RectTransform>();
-			_cardRestPosition = cardRect.anchoredPosition;
+			if (cardRect == null)
+			{
+				cardRect = GetComponent<RectTransform>();
+			}
+			cardRestPosition = cardRect.anchoredPosition;
 		}
 
 		protected virtual void OnEnable()
 		{
-			if (cardPlayer == null) return;
+			if (cardPlayer == null)
+			{
+				return;
+			}
 			cardPlayer.OnCardDealt += HandleCardDealt;
 			cardPlayer.OnSwipeProgress += HandleSwipeProgress;
 			cardPlayer.OnOutcomeCommitting += HandleOutcomeCommitting;
@@ -95,7 +104,10 @@ namespace VerdichotomyFramework.Cards
 
 		protected virtual void OnDisable()
 		{
-			if (cardPlayer == null) return;
+			if (cardPlayer == null)
+			{
+				return;
+			}
 			cardPlayer.OnCardDealt -= HandleCardDealt;
 			cardPlayer.OnSwipeProgress -= HandleSwipeProgress;
 			cardPlayer.OnOutcomeCommitting -= HandleOutcomeCommitting;
@@ -105,8 +117,8 @@ namespace VerdichotomyFramework.Cards
 
 		protected virtual void HandleCardDealt(CardData card, int visitCount)
 		{
-			_currentCard = card;
-			_currentVisit = visitCount;
+			currentCard = card;
+			currentVisit = visitCount;
 			PopulateCard(card, visitCount);
 			PlayEnterAnimation();
 		}
@@ -116,13 +128,18 @@ namespace VerdichotomyFramework.Cards
 			var offset = progress * maxSwipeOffset * (dir == SwipeDirection.Left ? -1f : 1f);
 			var rotation = progress * maxSwipeRotation * (dir == SwipeDirection.Left ? 1f : -1f);
 
-			cardRect.anchoredPosition = _cardRestPosition + new Vector2(offset, 0f);
+			cardRect.anchoredPosition = cardRestPosition + new Vector2(offset, 0f);
 			cardRect.localRotation = Quaternion.Euler(0f, 0f, rotation);
 
 			if (leftHintGroup != null)
+			{
 				leftHintGroup.alpha = dir == SwipeDirection.Left ? progress : 0f;
+			}
+
 			if (rightHintGroup != null)
+			{
 				rightHintGroup.alpha = dir == SwipeDirection.Right ? progress : 0f;
+			}
 		}
 
 		protected virtual void HandleOutcomeCommitting(SwipeDirection dir, OutcomeData outcome)
@@ -177,12 +194,18 @@ namespace VerdichotomyFramework.Cards
 			var leftOutcome = card.GetLeftOutcomeForVisit(visitCount);
 			var rightOutcome = card.GetRightOutcomeForVisit(visitCount);
 
-			if (leftHintText != null) leftHintText.text = leftOutcome?.swipeHintText ?? string.Empty;
-			if (rightHintText != null) rightHintText.text = rightOutcome?.swipeHintText ?? string.Empty;
+			if (leftHintText != null) leftHintText.text = leftOutcome?.SwipeHintText ?? string.Empty;
+			if (rightHintText != null) rightHintText.text = rightOutcome?.SwipeHintText ?? string.Empty;
 
 			// Reset hint alphas
-			if (leftHintGroup != null) leftHintGroup.alpha = 0f;
-			if (rightHintGroup != null) rightHintGroup.alpha = 0f;
+			if (leftHintGroup != null)
+			{
+				leftHintGroup.alpha = 0f;
+			}
+			if (rightHintGroup != null)
+			{
+				rightHintGroup.alpha = 0f;
+			}
 
 			// Audio
 			if (audioSource != null && card.character != null)
@@ -210,20 +233,20 @@ namespace VerdichotomyFramework.Cards
 
 		protected virtual void PlayEnterAnimation()
 		{
-			if (_animationCoroutine != null) StopCoroutine(_animationCoroutine);
-			_animationCoroutine = StartCoroutine(EnterRoutine());
+			if (animationCoroutine != null) StopCoroutine(animationCoroutine);
+			animationCoroutine = StartCoroutine(EnterRoutine());
 		}
 
 		protected virtual void PlayExitAnimation(SwipeDirection dir)
 		{
-			if (_animationCoroutine != null) StopCoroutine(_animationCoroutine);
-			_animationCoroutine = StartCoroutine(ExitRoutine(dir));
+			if (animationCoroutine != null) StopCoroutine(animationCoroutine);
+			animationCoroutine = StartCoroutine(ExitRoutine(dir));
 		}
 
 		private IEnumerator EnterRoutine()
 		{
 			// Slide in from a slight upward position, fade in
-			var startPos = _cardRestPosition + new Vector2(0f, 60f);
+			var startPos = cardRestPosition + new Vector2(0f, 60f);
 			cardRect.anchoredPosition = startPos;
 			cardRect.localRotation = Quaternion.identity;
 
@@ -232,10 +255,10 @@ namespace VerdichotomyFramework.Cards
 			{
 				elapsed += Time.deltaTime;
 				var t = Mathf.SmoothStep(0f, 1f, elapsed / enterDuration);
-				cardRect.anchoredPosition = Vector2.Lerp(startPos, _cardRestPosition, t);
+				cardRect.anchoredPosition = Vector2.Lerp(startPos, cardRestPosition, t);
 				yield return null;
 			}
-			cardRect.anchoredPosition = _cardRestPosition;
+			cardRect.anchoredPosition = cardRestPosition;
 		}
 
 		private IEnumerator ExitRoutine(SwipeDirection dir)
@@ -243,7 +266,7 @@ namespace VerdichotomyFramework.Cards
 			var targetX = dir == SwipeDirection.Left ? -maxSwipeOffset * 2f : maxSwipeOffset * 2f;
 			var targetRot = dir == SwipeDirection.Left ? maxSwipeRotation : -maxSwipeRotation;
 			var startPos = cardRect.anchoredPosition;
-			var endPos = _cardRestPosition + new Vector2(targetX, 0f);
+			var endPos = cardRestPosition + new Vector2(targetX, 0f);
 			var startRot = cardRect.localRotation;
 			var endRot = Quaternion.Euler(0f, 0f, targetRot);
 
@@ -258,7 +281,7 @@ namespace VerdichotomyFramework.Cards
 			}
 
 			// Reset silently for reuse
-			cardRect.anchoredPosition = _cardRestPosition;
+			cardRect.anchoredPosition = cardRestPosition;
 			cardRect.localRotation = Quaternion.identity;
 		}
 	}

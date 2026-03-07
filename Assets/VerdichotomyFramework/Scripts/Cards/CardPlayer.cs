@@ -1,37 +1,34 @@
 using System;
 using UnityEngine;
 using VerdichotomyFramework.Cards.Data;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards
 {
-	public enum SwipeDirection
-	{
-		Left,
-		Right
-	}
-
     /// <summary>
-    ///     Mediates between the presentation layer (UI/input) and the data layer.
-    ///     Responsibilities:
-    ///     - Tracks the current active card and visit count
-    ///     - Applies stat deltas, flag effects, and scheduling effects on commit
-    ///     - Drives the turn cycle
-    ///     The UI layer calls CommitSwipe() when the player finalises their choice.
-    ///     It subscribes to the events below to know when to animate and update.
+    /// Mediates between the presentation layer (UI/input) and the data layer.
+    /// Responsibilities:
+    /// <list type="bullet">
+    /// <item>Tracks the current active card and visit count</item>
+    /// <item>Applies stat deltas, flag effects, and scheduling effects on commit</item>
+    /// <item>Drives the turn cycle</item>
+    /// </list>
+    /// The UI layer calls CommitSwipe() when the player finalises their choice.
+    /// It subscribes to the events below to know when to animate and update.
     /// </summary>
     public class CardPlayer : MonoBehaviour
 	{
-		// ── Dependencies ──────────────────────────────────────────────────────
+		// ── Dependencies ────────────────────────────────────────────────────── //
 
-		public GameStateManager stateManager;
-		public CardScheduler scheduler;
+		private GameStateManager stateManager;
+		private CardScheduler scheduler;
 
-		// ── State ─────────────────────────────────────────────────────────────
+		// ── State ───────────────────────────────────────────────────────────── //
 
 		private CardData _currentCard;
 		private int _currentVisit;
 		private bool _waitingForNextCard;
 
-		// ── Lifecycle ─────────────────────────────────────────────────────────
+		// ── Lifecycle ───────────────────────────────────────────────────────── //
 
 		private void Start()
 		{
@@ -51,8 +48,15 @@ namespace VerdichotomyFramework.Cards
 
 		// ── Events ────────────────────────────────────────────────────────────
 
-		/// <summary>Fired when a new card is ready for presentation.</summary>
-		public event Action<CardData, int /* visitCount */> OnCardDealt;
+		/// <summary>
+		/// Fired when a new card is ready for presentation.
+		/// Provides:
+		/// <list>
+		/// <item>CardData: The Data associated with the card.</item>
+		/// <item>int: The tally of the amount of times the card has been visited.</item>
+		/// </list>
+		/// </summary>
+		public event Action<CardData, int> OnCardDealt;
 
 		/// <summary>Fired during swipe gesture with direction and normalised progress (0‥1).</summary>
 		public event Action<SwipeDirection, float> OnSwipeProgress;
@@ -72,13 +76,11 @@ namespace VerdichotomyFramework.Cards
 			_waitingForNextCard = true;
 			// block dealing until new run
 		}
-
-		// ── Public API (called by UI layer) ───────────────────────────────────
-
+		
         /// <summary>
-        ///     Called by the UI during a swipe gesture to update preview state.
-        ///     direction: which way the card is moving.
-        ///     progress: 0 = centre, 1 = fully committed.
+        /// Called by the UI during a swipe gesture to update preview state.
+        /// direction: which way the card is moving.
+        /// progress: 0 = centre, 1 = fully committed.
         /// </summary>
         public void UpdateSwipeProgress(SwipeDirection direction, float progress)
 		{
@@ -86,8 +88,8 @@ namespace VerdichotomyFramework.Cards
 		}
 
         /// <summary>
-        ///     Called by the UI when the player releases and commits to a swipe.
-        ///     This is the main entry point for resolving a card.
+        /// Called by the UI when the player releases and commits to a swipe.
+        /// This is the main entry point for resolving a card.
         /// </summary>
         public void CommitSwipe(SwipeDirection direction)
 		{
@@ -110,9 +112,7 @@ namespace VerdichotomyFramework.Cards
 				DealNextCard();
 			}
 		}
-
-		// ── Internal ──────────────────────────────────────────────────────────
-
+        
 		private void DealNextCard()
 		{
 			_currentCard = scheduler.GetNextCard();
@@ -136,8 +136,8 @@ namespace VerdichotomyFramework.Cards
 			var deltas = outcome.ResolveDeltas(stateManager);
 			foreach (var delta in deltas)
 			{
-				if (delta.stat == null) continue;
-				var lethal = stateManager.ApplyStatDelta(delta.stat.statId, delta.delta);
+				if (delta.Stat == null) continue;
+				var lethal = stateManager.ApplyStatDelta(delta.Stat.statId, delta.Delta);
 				if (lethal)
 				{
 					_waitingForNextCard = true;
@@ -146,13 +146,13 @@ namespace VerdichotomyFramework.Cards
 			}
 
 			// Flag effects
-			foreach (var flagEffect in outcome.flagEffects)
+			foreach (var flagEffect in outcome.FlagEffects)
 			{
 				stateManager.ApplyFlagEffect(flagEffect);
 			}
 
 			// Scheduling effects
-			scheduler.ApplySchedulingEffects(outcome.schedulingEffects);
+			scheduler.ApplySchedulingEffects(outcome.SchedulingEffects);
 		}
 	}
 }

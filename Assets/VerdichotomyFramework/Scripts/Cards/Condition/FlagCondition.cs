@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VerdichotomyFramework.GameState;
 namespace VerdichotomyFramework.Cards.Condition
 {
 	/// <summary>
@@ -11,11 +12,12 @@ namespace VerdichotomyFramework.Cards.Condition
 		[Tooltip("Flag ID to evaluate (must exist in FlagRegistry).")]
 		public string flagId;
 
-		public FlagCompareOperation operation = FlagCompareOperation.Equals;
+		protected FlagCompareOperation operation = FlagCompareOperation.Equals;
 
 		[Tooltip("Value to compare against.")]
 		public int compareValue = 1;
 
+		/// <inheritdoc />
 		public override bool Evaluate(GameStateManager state)
 		{
 			if (string.IsNullOrEmpty(flagId)) return ApplyInvert(true);
